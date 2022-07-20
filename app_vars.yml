@@ -1,5 +1,5 @@
-mysql_root_password: wordpress
+mysql_root_password: change_me
 mysql_database: wordpress
 mysql_user: wordpress
-mysql_password: wordpress
-wordpress_site_url: https://www.gaurav.com
+mysql_password: change_me
+wordpress_site_url: http://49.36.30.2
