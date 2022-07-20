@@ -1,0 +1,84 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars_files:
+   - infra_vars.yml 
+  tasks:
+    - name: Create a EC2 key pair
+      amazon.aws.ec2_key:
+        name: "{{ key_name }}"
+        profile: "{{ aws_profile }}"
+      register: ec2_key
+      notify: "copy key"
+
+    - name: Create WebServer Security Group
+      amazon.aws.ec2_group:
+        name: "{{ security_group_name }}"
+        description: "Webserver SG"
+        vpc_id: "{{ vpc_id }}"
+        profile: "{{ aws_profile }}"
+        rules:
+        - proto: tcp
+          ports:
+          - 80
+          cidr_ip: 0.0.0.0/0
+          rule_desc: allow all on port 80
+        - proto: tcp
+          ports:
+          - 443
+          cidr_ip: 0.0.0.0/0
+          rule_desc: allow all on port 443
+        - proto: tcp
+          ports:
+          - 22
+          cidr_ip: "{{ allow_ssh_ip }}"
+      register: security_group
+
+    - name: Deploy EC2 Instance
+      amazon.aws.ec2_instance:
+        key_name: "{{ key_name }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ image }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        profile: "{{ aws_profile }}"
+        security_group: "{{ security_group.group_id }}"
+        network:
+          assign_public_ip: yes  
+        tags:
+          Name : "{{ instance_name_tag }}"
+      register: "ec2_instance"
+    
+    - name:   
+      ansible.builtin.pause:
+        seconds: 30
+      when: ec2_instance.changed == true
+
+    - name: Allocate Elastic IP and attach to Instance Interface
+      ec2_eip:
+        device_id: "{{ ec2_instance.instances[0].network_interfaces[0].network_interface_id }}"
+        profile: "{{ aws_profile }}"
+        in_vpc: true
+      register: eip
+     
+    - name:   
+      ansible.builtin.pause:
+        seconds: 30
+      when: eip.changed == true
+
+    - name: Add Host
+      add_host:
+        name: "{{ eip.public_ip }}"
+        group: webserver
+        ansible_user: ec2-user
+        ansible_ssh_private_key_file: wordpress.pem
+
+  handlers:   
+    - name: copy key
+      copy: 
+        content: "{{ ec2_key.key.private_key }}"
+        dest: "{{ key_name }}.pem"
+        mode: "0400"
+
+- import_playbook: application-deployment.yml
+    
+

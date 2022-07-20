@@ -1,0 +1,66 @@
+- name: "Wordpress Deployment"
+  hosts: webserver
+  gather_facts: no
+  become: yes
+  vars_files:
+    - app_vars.yml
+  tasks:
+    - name: "Enable php repo"
+      shell: "amazon-linux-extras enable php7.4"
+
+    - name: "Install Docker, Apache and PHP7.4"
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - docker
+        - python3-pip
+        - httpd
+        - php
+        - php-mysqlnd
+        - php-mbstring
+        - php-json
+        - php-xml
+        - php-zip
+
+    - name: "Start Services"
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - docker
+        - httpd
+    
+    - name: Install docker python module
+      ansible.builtin.pip:
+        name: docker
+
+    - name: Deploy MySQL Container
+      docker_container:
+        name: mysql-container
+        image: ubuntu/mysql
+        state: started
+        ports:
+        - "3306:3306"
+        volumes:
+        - mysql-data:/var/lib/mysql
+        restart: true
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+          MYSQL_DATABASE: "{{ mysql_database }}"
+          MYSQL_USER: "{{ mysql_user }}"
+          MYSQL_PASSWORD: "{{ mysql_password }}"
+      
+    - name: "Copy wp-config file"
+      ansible.builtin.template:
+        src: templates/wp-config.j2
+        dest: /var/www/html/wp-config.php
+        owner: apache
+        group: apache
+    
+    - name: "Copy Wordpress file"
+      synchronize:
+        src: wordpress/
+        dest: /var/www/html
+        recursive: yes

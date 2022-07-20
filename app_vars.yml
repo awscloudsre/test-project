@@ -1,0 +1,5 @@
+mysql_root_password: wordpress
+mysql_database: wordpress
+mysql_user: wordpress
+mysql_password: wordpress
+wordpress_site_url: https://www.gaurav.com
