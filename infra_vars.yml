@@ -1,5 +1,5 @@
 key_name: wordpress
-aws_profile: dev
+aws_profile: default
 instance_type: t2.medium
 image: ami-0cff7528ff583bf9a
 instance_name_tag: Wordpress
