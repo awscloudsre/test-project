@@ -5,5 +5,5 @@ image: ami-0cff7528ff583bf9a
 instance_name_tag: Wordpress
 vpc_subnet_id: subnet-05ecbaf6a85e2a29d
 vpc_id: vpc-0da518611127f1634
-allow_ssh_ip: 49.36.30.2/32
+allow_ssh_ip: 49.36.25.88/32
 security_group_name: "Wordpress Security Group"

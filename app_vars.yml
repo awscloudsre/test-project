@@ -2,4 +2,4 @@ mysql_root_password: change_me
 mysql_database: wordpress
 mysql_user: wordpress
 mysql_password: change_me
-wordpress_site_url: http://49.36.30.2
+wordpress_site_url: http://54.82.229.103

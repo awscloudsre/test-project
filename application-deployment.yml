@@ -1,6 +1,6 @@
 - name: "Wordpress Deployment"
   hosts: webserver
-  gather_facts: no
+  gather_facts: yes
   become: yes
   vars_files:
     - app_vars.yml
