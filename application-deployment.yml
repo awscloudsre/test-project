@@ -15,7 +15,7 @@
       with_items:
         - docker
         - python3-pip
-        - python-pip
+        - python2-pip
         - httpd
         - php
         - php-mysqlnd
