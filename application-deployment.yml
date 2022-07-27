@@ -15,6 +15,7 @@
       with_items:
         - docker
         - python3-pip
+        - python-pip
         - httpd
         - php
         - php-mysqlnd
@@ -34,7 +35,8 @@
     
     - name: Install docker python module
       ansible.builtin.pip:
-        name: docker
+        name: docker-py
+        executable: pip
 
     - name: Deploy MySQL Container
       docker_container:
